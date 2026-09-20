@@ -1,0 +1,21 @@
+{
+    "title": "Carrying capacity as a bound variable: an interactive figure",
+    "upload_type": "software",
+    "description": "<p>An interactive figure supplementing an epistemological study of collapsology's borrowed vocabulary.</p><p>In population ecology, carrying capacity is the coefficient K of the logistic growth equation, defined only relative to a species, an environment, a resource-renewal regime and a timescale. K is therefore a function of four arguments, returning a number only once all four are bound. In collapsological usage the argument-places are silently deleted and the result is spoken of as a single fixed quantity. This figure makes that deletion operable: bind the arguments and the number moves across more than an order of magnitude; leave one free and there is no number at all.</p><p><strong>Live version:</strong> <a href=\"https://edithlaszny.github.io/carrying-capacity/\">https://edithlaszny.github.io/carrying-capacity/</a></p><p><strong>The figures are illustrative, not measured.</strong> The model is a schematic product of four factors of no independent provenance, chosen so that the published estimates of two, ten and forty billion fall inside its range. No value shown is an estimate of any quantity, and none should be cited as one.</p>",
+    "creators": [
+        {
+            "name": "Hlaszny, Edit",
+            "orcid": "0009-0005-6549-9839"
+        }
+    ],
+    "license": "cc-by-4.0",
+    "keywords": [
+        "carrying capacity",
+        "logistic model",
+        "collapsology",
+        "conceptual migration",
+        "reification",
+        "interactive figure"
+    ],
+    "language": "eng"
+}

@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<!--
+    TITLE:          Carrying capacity as a bound variable — an interactive figure
+
+    FILE:           carrying_capacity.html
+    VERSION:        1-001
+
+    PURPOSE:        Binds the four arguments of the logistic coefficient K one at a
+                    time, so that the same expression yields figures across more than
+                    an order of magnitude with no evidence intervening, and returns
+                    no value while any argument is left free.
+
+    SUPPLEMENT TO:  Hlaszny, E. Collapsology: An Epistemological Inquiry.
+
+    NOTE:           Illustrative, not measured. The model is a schematic product of
+                    four factors. It is not an estimate of any quantity and must not
+                    be cited as one.
+
+    LICENCE:        CC BY 4.0
+    SUPERVISED BY:  -
+
+    CREATION DATE:  20-SEP-2026
+
+    ENVIRONMENT:    Firefox V.82.0.2 (64 bit)
+                    Google Chrome Version 86.0.4240.111 (Official Build) (x86_64)
+                    Safari Version 13.1 (15609.1.20.111.8)
+                    on iMAC macOS Monterey (12.5.1)
+
+    DESIGN ISSUES:  1) http://www.w3.org/TR/2004/WD-xhtml2-20040722/
+                    2) http://www.w3.org/TR/REC-CSS1 Cascading Style Sheets, level 1
+
+    SUBSYSTEM:      none
+
+    MODIFICATION HISTORY:
+        date        modified by
+        20-SEP-2026 Hlaszny   1-001 first draw
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Carrying Capacity — a bound variable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root
+        {
+            /* ---------- colour ---------- */
+            --paper:#FFFFFF;
+            --desk:rgba(227, 198, 168, 0.2);
+            --ink:#16221E;
+            --ink-soft:#404040;
+            --ink-footer:#404040;
+            --rule:#D6DDDA;
+            --rule-strong:#000000;
+            --vec:#2C2D4E;
+            --sel:#7A1F5C;
+            --der:#8A6512;
+            --ghost:#9CA9A4;
+            --warn:#8C2E20;
+
+            /* ---------- role ---------- */
+            --bound:var(--vec);
+            --unbound:var(--warn);
+            --locked:var(--ghost);       /* locked by def */
+            --disc:var(--sel);           /* a K-disc      */
+            --mark:var(--der);           /* citatedestimations on the axis */
+
+            /* ---------- size ---------- */
+            --u:1rem;
+            --gap:.55rem;
+            --pad-box:.85rem 1rem;
+            --bd:1px;
+            --bd-strong:2px;
+            --col-ctrl:22rem;
+            --disc-box:19rem;
+            --axis-h:4.2rem;
+            --fs-h1:2.2rem;
+            --fs-sub:1.05rem;
+            --fs-body:.95rem;
+            --fs-small:.8rem;
+            --fs-mono:.78rem;
+            --fs-fact:3.4rem;
+            --t-slow:.9s;
+            --t-fast:.18s;
+        }
+        *{box-sizing:border-box}
+        html{font-size:17px}
+        body
+        {
+            margin:0; background:var(--desk); color:var(--ink);
+            font-family:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+            line-height:1.55; -webkit-font-smoothing:antialiased;
+        }
+        .wrap{max-width:1200px; margin:0 auto; padding:2.2rem 1.4rem 4rem}
+
+        /* ---------- fejléc ---------- */
+        header{max-width:60ch; margin-bottom:1.6rem}
+        h1
+        {
+            font-size:var(--fs-h1); font-weight:400; letter-spacing:-.015em;
+            margin:0 0 .75rem; line-height:1.05;
+        }
+        .sub{font-style:italic; color:var(--ink-soft); margin:0 0 .9rem; font-size:var(--fs-sub)}
+        .lede{margin:0; font-size:var(--fs-body); color:var(--ink-soft)}
+
+        /* ---------- vezérlősáv ---------- */
+        .bar
+        {
+            display:flex; flex-wrap:wrap; gap:var(--gap) .9rem; align-items:center;
+            padding:var(--pad-box); margin:1.4rem 0 .7rem;
+            background:var(--paper); border:var(--bd) solid var(--rule);
+        }
+        .bar-label
+        {
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            color:var(--ink-soft); letter-spacing:.02em;
+        }
+        .spacer{flex:1 1 auto}
+
+        button
+        {
+            font-family:inherit; font-size:var(--fs-small); color:var(--ink);
+            background:var(--paper); border:var(--bd) solid var(--rule-strong);
+            padding:.34rem .8rem; cursor:pointer; line-height:1.3;
+            transition:background var(--t-fast), border-color var(--t-fast);
+        }
+        button:hover{background:var(--desk)}
+        button:focus-visible{outline:var(--bd-strong) solid var(--vec); outline-offset:2px}
+        button[aria-pressed="true"]
+        {
+            background:var(--ink); color:var(--paper); border-color:var(--ink);
+        }
+        button[disabled]{color:var(--ghost); border-color:var(--rule); cursor:default}
+        button[disabled]:hover{background:var(--paper)}
+
+        .seg{display:flex}
+        .seg button{border-right-width:0}
+        .seg button:last-child{border-right-width:var(--bd)}
+
+        /* ---------- törzs ---------- */
+        .body
+        {
+            display:grid; grid-template-columns:var(--col-ctrl) 1fr; gap:1.1rem;
+            align-items:start;
+        }
+        @media (max-width:860px){ .body{grid-template-columns:1fr} }
+
+        .panel
+        {
+            background:var(--paper); border:var(--bd) solid var(--rule);
+            padding:1.1rem 1rem 1.2rem;
+        }
+
+        /* ---------- args ---------- */
+        .arg{margin-bottom:1.25rem}
+        .arg:last-child{margin-bottom:0}
+
+        .arg-head
+        {
+            display:flex; align-items:baseline; gap:.5rem;
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            color:var(--ink-soft); margin-bottom:.3rem;
+        }
+        .arg-state
+        {
+            margin-left:auto; font-style:normal; color:var(--unbound);
+        }
+        .arg.is-bound .arg-state{color:var(--bound)}
+        .arg.is-locked .arg-state{color:var(--locked)}
+
+        .arg-value
+        {
+            font-size:var(--fs-body); min-height:1.6em;
+            color:var(--unbound); font-style:italic;
+        }
+        .arg.is-bound .arg-value{color:var(--ink); font-style:normal}
+        .arg.is-locked .arg-value{color:var(--locked); font-style:normal}
+
+        input[type=range]
+        {
+            width:100%; margin:.45rem 0 0; accent-color:var(--vec);
+            cursor:pointer; background:transparent;
+        }
+        input[type=range]:focus-visible{outline:var(--bd-strong) solid var(--vec); outline-offset:3px}
+        .arg.is-locked input[type=range]{accent-color:var(--ghost); cursor:not-allowed}
+        .arg:not(.is-bound):not(.is-locked) input[type=range]{accent-color:var(--unbound)}
+
+        .arg-note
+        {
+            font-size:var(--fs-small); color:var(--ink-soft);
+            font-style:italic; margin-top:.3rem; min-height:1.3em;
+        }
+
+        /* ---------- output ---------- */
+        .out{display:grid; grid-template-columns:var(--disc-box) 1fr; gap:1.2rem; align-items:center}
+        @media (max-width:700px){ .out{grid-template-columns:1fr} }
+
+        .disc-box{position:relative}
+        .disc-cap
+        {
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            color:var(--ink-soft); text-align:center; margin-top:-.4rem;
+        }
+
+        /* ---------- concepts ---------- */
+        .gloss
+        {
+            margin-top:1.1rem;
+            display:grid; grid-template-columns:repeat(3,1fr); gap:1.6rem;
+        }
+        @media (max-width:860px){ .gloss{grid-template-columns:1fr; gap:1.3rem} }
+
+        .gloss h2
+        {
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            font-weight:500; color:var(--ink-soft); letter-spacing:.02em;
+            margin:0 0 .5rem; padding-bottom:.35rem;
+            border-bottom:var(--bd) solid var(--rule);
+        }
+        .gloss p{margin:0 0 .55rem; font-size:var(--fs-small); line-height:1.5}
+        .gloss p:last-child{margin-bottom:0}
+
+        .formula
+        {
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            color:var(--vec); line-height:1.7; word-spacing:-.1em;
+        }
+        .gloss dl{margin:0; font-size:var(--fs-small)}
+        .gloss dt
+        {
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            color:var(--vec); margin-top:.5rem;
+        }
+        .gloss dt:first-child{margin-top:0}
+        .gloss dd{margin:.1rem 0 0; line-height:1.45}
+
+        .statement{font-size:1.02rem; line-height:1.6; text-wrap:balance}
+        .statement .binding
+        {
+            color:var(--bound); border-bottom:var(--bd) solid var(--rule-strong); font-weight:600;
+        }
+        .statement .figure
+        {
+            font-family:"IBM Plex Mono",monospace; font-weight:500;
+            font-size:1.3rem; color:var(--ink);
+        }
+        .statement.is-undefined{color:var(--unbound)}
+        .statement.is-undefined.lead{font-weight:600}
+
+        /* ---------- axes ---------- */
+        .axis-box{margin-top:1.1rem; border-top:var(--bd) solid var(--rule); padding-top:.8rem}
+        .axis-note
+        {
+            font-size:var(--fs-small); color:var(--mark); font-style:italic;
+            min-height:1.4em; margin-top:.2rem;
+        }
+
+        /* ---------- fact-mode ---------- */
+        .fact-layer
+        {
+            position:absolute; inset:0; background:var(--paper);
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
+            text-align:center; padding:2rem; opacity:0; pointer-events:none;
+            transition:opacity var(--t-slow);
+        }
+        .fact-layer.on{opacity:1; pointer-events:auto}
+        .fact-line{font-size:var(--fs-fact); line-height:1.1; font-weight:400; margin:0}
+        .fact-restore
+        {
+            margin-top:2.4rem; opacity:0;
+            transition:opacity var(--t-slow);
+        }
+        .fact-restore.on{opacity:1}
+        .fact-gloss
+        {
+            font-size:var(--fs-small); color:var(--ink-soft);
+            max-width:44ch; margin:0 auto 1.4rem;
+        }
+        .stage{position:relative; min-height:23rem}
+        @media (prefers-reduced-motion:reduce){
+            .fact-layer,.fact-restore{transition:none}
+        }
+
+        /* ---------- footnote ---------- */
+        footer
+        {
+            margin-top:0.4rem; font-size:var(--fs-small); color:var(--ink-footer);
+            max-width:78ch; border-top:var(--bd) solid var(--rule); padding-top:.4rem;
+            line-height:1.25;
+        }
+        footer p{margin:0 0 .4rem}
+        kbd
+        {
+            font-family:"IBM Plex Mono",monospace; font-size:var(--fs-mono);
+            border:var(--bd) solid var(--rule-strong); padding:0 .3em; background:var(--paper);
+        }
+        .live{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <header>
+        <h1 data-vk="title">Carrying Capacity</h1>
+        <p class="sub" data-vk="subtitle">A bound variable, not a physical ceiling in the world.</p>
+        <p class="lede" data-vk="lede">
+            K is a function of four arguments and returns a number only once all four are fixed.
+            Bind them, and watch the single figure move across an order of magnitude with no new
+            evidence arriving.
+        </p>
+    </header>
+
+    <div class="bar">
+        <span class="bar-label" data-vk="senseLabel">the symbol K is read as</span>
+        <div class="seg" role="group">
+            <button id="bBio"  aria-pressed="false" data-vk="senseBio">K_bio</button>
+            <button id="bSoc"  aria-pressed="true"  data-vk="senseSoc">K_soc</button>
+        </div>
+
+        <span class="bar-label" data-vk="presetLabel">reproduce a quoted figure</span>
+        <div class="seg" role="group">
+            <button id="p2"  data-vk="preset2">≈2 bn</button>
+            <button id="p10" data-vk="preset10">≈10 bn</button>
+            <button id="p40" data-vk="preset40">≈40 bn</button>
+        </div>
+
+        <button id="bClear" data-vk="clear">Clear the bindings</button>
+
+        <span class="spacer"></span>
+
+        <div class="seg" role="group" aria-label="language">
+            <button id="bEn" aria-pressed="true">EN</button>
+            <button id="bHu" aria-pressed="false">HU</button>
+        </div>
+    </div>
+
+    <div class="body">
+
+        <!-- ══════════ left: the arguments ══════════ -->
+        <div class="panel">
+
+            <div class="arg is-locked" id="argSpecies">
+                <div class="arg-head">
+                    <span data-vk="argSpecies">species</span>
+                    <span class="arg-state" data-vk="stateGiven">given</span>
+                </div>
+                <div class="arg-value">Homo sapiens</div>
+                <div class="arg-note" data-vk="speciesNote">Bound by the question itself, which is why it is never noticed.</div>
+            </div>
+
+            <div class="arg" id="argEnv">
+                <div class="arg-head">
+                    <span data-vk="argEnv">environment</span>
+                    <span class="arg-state" data-vk="stateUnbound">unbound</span>
+                </div>
+                <div class="arg-value" data-slot="value"></div>
+                <input type="range" id="sEnv" min="0" max="4" step="1" value="0">
+                <div class="arg-note" data-slot="note"></div>
+            </div>
+
+            <div class="arg" id="argReg">
+                <div class="arg-head">
+                    <span data-vk="argReg">resource-renewal regime</span>
+                    <span class="arg-state" data-vk="stateUnbound">unbound</span>
+                </div>
+                <div class="arg-value" data-slot="value"></div>
+                <input type="range" id="sReg" min="0" max="3" step="1" value="0">
+                <div class="arg-note" data-slot="note"></div>
+            </div>
+
+            <div class="arg" id="argTime">
+                <div class="arg-head">
+                    <span data-vk="argTime">timescale</span>
+                    <span class="arg-state" data-vk="stateUnbound">unbound</span>
+                </div>
+                <div class="arg-value" data-slot="value"></div>
+                <input type="range" id="sTime" min="0" max="4" step="1" value="0">
+                <div class="arg-note" data-slot="note"></div>
+            </div>
+
+        </div>
+
+        <!-- ══════════ right: the output ══════════ -->
+        <div class="panel stage">
+
+            <div class="out">
+                <div class="disc-box">
+                    <svg id="disc" viewBox="0 0 300 320" role="img" aria-hidden="true">
+                        <circle id="discRing" cx="150" cy="134" r="118"
+                                fill="none" stroke="var(--rule)" stroke-dasharray="3 5"></circle>
+                        <circle id="discFill" cx="150" cy="134" r="0"
+                                fill="var(--disc)" fill-opacity=".16"
+                                stroke="var(--disc)" stroke-width="1.5"></circle>
+                        <text id="discText" x="150" y="160" text-anchor="middle"
+                              dominant-baseline="hanging"
+                              font-family="IBM Plex Mono, monospace" font-size="30"
+                              fill="var(--ink)">—</text>
+                    </svg>
+                    <div class="disc-cap" data-vk="discCap">disc area ∝ K</div>
+                </div>
+
+                <div>
+                    <p class="statement is-undefined" id="statement"></p>
+                    <div style="margin-top:1rem">
+                        <button id="bCopy" data-vk="copy">Copy the bound statement</button>
+                        <span style="font-size:6px;"><p /></span>
+                        <button id="bFact" data-vk="fact">Report this as a fact</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="axis-box">
+                <svg id="axis" viewBox="0 0 900 72" preserveAspectRatio="none"
+                     style="width:100%; height:var(--axis-h)" role="img" aria-hidden="true">
+                    <line x1="30" y1="46" x2="870" y2="46" stroke="var(--rule-strong)" stroke-width="1"></line>
+                    <g id="axisTicks"></g>
+                    <g id="axisMarks"></g>
+                    <g id="axisNeedle" opacity="0">
+                        <line x1="0" y1="26" x2="0" y2="58" stroke="var(--disc)" stroke-width="2"></line>
+                        <circle cx="0" cy="26" r="3.5" fill="var(--disc)"></circle>
+                    </g>
+                </svg>
+                <div class="axis-note" id="axisNote"></div>
+            </div>
+
+            <!-- ══════════ reification ══════════ -->
+            <div class="fact-layer" id="factLayer">
+                <p class="fact-line" id="factLine"></p>
+                <div class="fact-restore" id="factRestore">
+                    <p class="fact-gloss" id="factGloss"></p>
+                    <button id="bRestore" data-vk="restore">Restore the bindings</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════ bilingual concept-vocabulary ══════════ -->
+    <div class="panel gloss">
+
+        <div>
+            <h2 data-vk="glossKTitle">What K is</h2>
+            <p class="formula">K(species,&nbsp;environment,<br>&nbsp;&nbsp;&nbsp;resource-regime,&nbsp;timescale)&nbsp;→&nbsp;n</p>
+            <p data-vk="glossKBody">
+                A mapping, not a quantity. It takes a four-tuple and returns a single number n.
+                Remove any one coordinate and K has no value at all — it is undefined, as a
+                function is undefined outside its domain. K is therefore a property of a
+                species–environment–resource–time tuple, never a property of a place.
+            </p>
+        </div>
+
+        <div>
+            <h2 data-vk="glossArgsTitle">The four arguments</h2>
+            <dl>
+                <dt data-vk="argSpecies">species</dt>
+                <dd data-vk="glossSpecies">Whose population is counted. Fixed here, because the question already fixes it.</dd>
+                <dt data-vk="argEnv">environment</dt>
+                <dd data-vk="glossEnv">Which biosphere is assumed, in what condition.</dd>
+                <dt data-vk="argReg">resource-renewal regime</dt>
+                <dd data-vk="glossReg">At what rate resources are replaced, and by what technology.</dd>
+                <dt data-vk="argTime">timescale</dt>
+                <dd data-vk="glossTime">Over what horizon the other three are treated as constant.</dd>
+            </dl>
+        </div>
+
+        <div>
+            <h2 data-vk="glossSignsTitle">Three readings, one symbol</h2>
+            <dl>
+                <dt>K_bio</dt>
+                <dd data-vk="glossBio">The ecological parameter of the logistic model. It presupposes a fixed resource regime, which is why that slider locks.</dd>
+                <dt>K_soc</dt>
+                <dd data-vk="glossSoc">The population sustainable given prevailing technology and trade. Here the resource regime is the variable, not a constant.</dd>
+                <dt>K_Earth</dt>
+                <dd data-vk="glossEarth">The collapsological usage: a bare constant, treated as fixed the way K_bio is. The fact button turns the bound statement into one.</dd>
+            </dl>
+        </div>
+
+    </div>
+
+    <footer>
+        <p data-vk="footNote"></p>
+        <p id="keysLine"></p>
+        <p data-vk="author"></p>
+    </footer>
+
+    <div class="live" id="live" aria-live="polite"></div>
+</div>
+
+<script>
+(() =>
+{
+    "use strict";
+
+    /* ══════════ bilingual vocabulary ══════════ */
+
+    const VOCABULARY =
+    {
+        title:        { en:"Carrying Capacity",
+                        hu:"Eltartóképesség" },
+        subtitle:     { en:"A bound variable, not a physical ceiling in the world",
+                        hu:"Kötött változó, nem a világ objektív adottsága." },
+        lede:         { en:"K is a four-argument function that returns a number only when all four arguments are bound. Bind them, and watch the single figure move by more than an order of magnitude with no new evidence arriving.",
+                        hu:"A K négyváltozós függvény, amely csak mind a négy változó megkötésével ad értéket. Kösse meg őket, és figyelje, ahogy az egyetlen szám több mint egy nagyságrenddel is elmozdul anélkül, hogy egyetlen új adat érkeznék." },
+
+        senseLabel:   { en:"the symbol K is read as",                hu:"a K jel olvasata" },
+
+        glossKTitle:  { en:"What K is",                              hu:"Mi az a K" },
+        glossKBody:   { en:"A mapping, not a quantity. It takes a four-tuple and returns a single number n. Remove any one coordinate and K has no value at all — it is undefined, as a function is undefined outside its domain. K is therefore a property of a species–environment–resource–time tuple, never a property of a place.",
+                        hu:"Leképezés, nem mennyiség. Egy négyesből egyetlen n számot állít elő. Vegye el bármelyik koordinátát, és K-nak nincs értéke — egy függvény nem értelmezethető az értelmezési tartományán kívül. K tehát egy faj–környezet–erőforrás–idő négyes tulajdonsága, sohasem egy helyé." },
+
+        glossArgsTitle:{ en:"The four arguments",                     hu:"A négy argumentum" },
+        glossSpecies: { en:"Whose population is counted. Fixed here, because the question already fixes it.",
+                        hu:"Kinek a népességét számoljuk. Itt rögzített, mert már a kérdés megköti." },
+        glossEnv:     { en:"Which biosphere is assumed, in what condition.",
+                        hu:"Melyik bioszférát tételezzük fel, és milyen állapotban." },
+        glossReg:     { en:"At what rate resources are replaced, and by what technology.",
+                        hu:"Milyen ütemben és milyen technológiával pótolja a faj az erőforrásokat." },
+        glossTime:    { en:"Over what horizon the other three are treated as constant.",
+                        hu:"Milyen horizonton tekintjük állandónak a másik hármat." },
+
+        glossSignsTitle:{ en:"Three readings, one symbol",            hu:"Három olvasat, egy jel" },
+        glossBio:     { en:"The ecological parameter of the logistic model. It presupposes a fixed resource regime, which is why that slider locks.",
+                        hu:"A logisztikus modell ökológiai paramétere. Rögzített erőforrás-rezsimet előfeltételez — ezért nem változtatható az a csúszka." },
+        glossSoc:     { en:"The population sustainable given prevailing technology and trade. Here the resource regime is the variable, not a constant.",
+                        hu:"Az uralkodó technológia és kereskedelem mellett eltartható népesség. Itt az erőforrás-rezsim a változó, nem állandó." },
+        glossEarth:   { en:"The collapsological usage: a bare constant, treated as fixed the way K_bio is. The fact button turns the bound statement into one.",
+                        hu:"A kollapszológia szóhasználata: puszta állandó, úgy kezelve, mintha K_bio volna. A tény-gomb a megkötött állítást alakítja ilyenné." },
+
+        senseBio:     { en:"K_bio",                                  hu:"K_bio" },
+        senseSoc:     { en:"K_soc",                                  hu:"K_soc" },
+        presetLabel:  { en:"reproduce a quoted figure",               hu:"idézett szám előállítása" },
+        preset2:      { en:"≈2 bn",                                  hu:"≈2 mrd" },
+        preset10:     { en:"≈10 bn",                                 hu:"≈10 mrd" },
+        preset40:     { en:"≈40 bn",                                 hu:"≈40 mrd" },
+        clear:        { en:"Clear the bindings",                      hu:"Kötések törlése" },
+
+        argSpecies:   { en:"species",                                hu:"faj" },
+        argEnv:       { en:"environment",                            hu:"környezet" },
+        argReg:       { en:"resource-renewal regime",                hu:"erőforrás-megújulási rezsim" },
+        argTime:      { en:"timescale",                              hu:"időhorizont" },
+
+        stateGiven:   { en:"given",                                  hu:"adott" },
+        stateBound:   { en:"bound",                                  hu:"megkötve" },
+        stateUnbound: { en:"unbound",                                hu:"kötetlen" },
+        stateFixed:   { en:"fixed by definition",                    hu:"definíció szerint rögzített" },
+
+        speciesNote:  { en:"Bound by the question itself, which is why it is never noticed.",
+                        hu:"Magát a kérdést köti meg, ezért nem tűnik fel soha." },
+        pickIt:       { en:"— not yet bound —",                       hu:"— még nincs megkötve —" },
+        regLockNote:  { en:"Held fixed by definition. This is what K_bio presupposes.",
+                        hu:"Definíció szerint rögzítve. Ezt előfeltételezi a K_bio." },
+        regFreeNote:  { en:"This is precisely the variable. K_soc has no content without it.",
+                        hu:"Éppen ez a változó. K_soc enélkül tartalmatlan." },
+
+        undefinedLead:{ en:"K is undefined.",                         hu:"K nem értelmezhető." },
+        undefinedBody:{ en:"Not uncertain — undefined, in the way a function value is undefined outside its domain. Still to bind:",
+                        hu:"Nem bizonytalan — nem értelmezhető, miként egy függvényérték nem értelmezhető az értelmezési tartományán kívül. Kötött változókat igényel:" },
+
+        stmtA:        { en:"The human population sustainable ",       hu:"Az eltartható emberi népesség " },
+        stmtB:        { en:", under ",                                hu:", ",
+                        note:"regime" },
+        stmtC:        { en:", over ",                                 hu:", " },
+        stmtD:        { en:" — approximately ",                       hu:" mellett — hozzávetőleg " },
+        stmtEnd:      { en:" billion.",                               hu:" milliárd." },
+
+        discCap:      { en:"disc area ∝ K",                           hu:"a korong területe ∝ K" },
+        copy:         { en:"Copy the bound statement",                hu:"A megkötött állítás másolása" },
+        copyDone:     { en:"Copied, with its bindings.",               hu:"Másolva, a kötéseivel együtt." },
+        fact:         { en:"Report this as a fact",                   hu:"Közlés puszta tényként" },
+        restore:      { en:"Restore the bindings",                    hu:"Kötések visszaállítása" },
+        factLine:     { en:"Earth's carrying capacity: ",              hu:"A Föld eltartóképessége: " },
+        factUnit:     { en:" billion.",                               hu:" milliárd." },
+        factGloss1:   { en:"What stands above is K_Earth: the same figure as a moment ago, ",
+                        hu:"Ami fent áll, az K_Earth: ugyanaz a szám, mint az imént, " },
+        factGloss2:   { en:", with its three bindings deleted. Nothing was measured; three arguments were dropped.",
+                        hu:" — csak a három kötése nélkül. Semmit nem mértünk; három argumentum tűnt el." },
+
+        nearMark:     { en:"A binding in this region yields the figure often quoted as ",
+                        hu:"Az ebben a tartományban vett kötés adja a gyakran idézett " },
+        nearMarkEnd:  { en:" billion.",                               hu:" milliárdos számot." },
+
+        bioSwitch:    { en:"K_bio: the resource regime is now held fixed.",
+                        hu:"K_bio: az erőforrás-rezsim mostantól rögzített." },
+        socSwitch:    { en:"K_soc: the resource regime is now free.",
+                        hu:"K_soc: az erőforrás-rezsim mostantól szabad." },
+        cleared:      { en:"Bindings cleared. K is undefined.",        hu:"Kötések törölve. K nincs értelmezve." },
+
+        footNote:     { en:"Figures are illustrative, not measured. The model is a schematic product of four factors, chosen so that the published estimates of two, ten and forty billion all fall inside its range. The point is not any figure but that every figure is a value of a function.",
+                        hu:"A számok szemléltetnek, nem mérnek. A modell négy tényező sematikus szorzata, úgy megválasztva, hogy a két-, tíz- és negyvenmilliárdos publikált becslések mind a tartományába essenek. A lényeg nem egy-egy konkrét szám, hanem az, hogy minden szám egy függvény értéke." },
+        keys:         { en:"Keys: 1 2 3 presets · c clear · b sense · f fact · l language",
+                        hu:"Billentyűk: 1 2 3 előbeállítás · c törlés · b értelem · f tény · l nyelv" },
+        author:       { en:"(c) Dr Hlaszny, Edit | V 1-001 | 20 Sep 2026" ,
+                        hu:"(c) Dr. Hlaszny Edit | V 1-001 | 2026/09/20"
+                      }
+    };
+
+    let language = "en";                       /* global; forrásban állítható */
+
+    function getVocabularyItem(lang, key)
+    {
+        const entry = VOCABULARY[key];
+
+        if (!entry)
+            return "\u27E8" + key + "\u27E9";
+
+        return entry[lang] || entry.en;
+    }
+
+    function t(key)
+    {
+        return getVocabularyItem(language, key);
+    }
+
+    /* ══════════ the model ══════════ */
+
+    const BASE = 5.0;
+
+    const ENV =
+    [
+        { k:null, en:null,                              hu:null },
+        { k:0.60, en:"in a degraded biosphere",         hu:"leromlott bioszférában" },
+        { k:1.00, en:"in the present biosphere",        hu:"a jelenlegi bioszférában" },
+        { k:1.30, en:"in a restored biosphere",         hu:"helyreállított bioszférában" },
+        { k:1.70, en:"in a fully industrialised biosphere", hu:"teljesen iparosított bioszférában" }
+    ];
+
+    const REG =
+    [
+        { k:null, en:null,                              hu:null },
+        { k:0.50, en:"a fixed pre-industrial resource regime",
+                  hu:"rögzített, iparosodás előtti erőforrás-rezsim" },
+        { k:1.20, en:"the prevailing resource regime",
+                  hu:"a jelenleg uralkodó erőforrás-rezsim" },
+        { k:2.60, en:"a regime of continuous technological substitution",
+                  hu:"folyamatos technológiai helyettesítés rezsimje" }
+    ];
+
+    const TIME =
+    [
+        { k:null, en:null,                              hu:null },
+        { k:0.55, en:"ten thousand years",              hu:"tízezer év" },
+        { k:0.80, en:"one thousand years",              hu:"ezer év" },
+        { k:1.20, en:"one hundred years",               hu:"száz év" },
+        { k:1.90, en:"fifty years",                     hu:"ötven év" }
+    ];
+
+    const REG_BIO_INDEX = 1;                   /* K_bio kényszere            */
+
+    const K_MIN = 0.8;
+    const K_MAX = 52;
+    const MARKS = [2, 10, 40];
+    const MARK_BAND = 0.16;                    /* ±16% = „e tartományban”    */
+
+    const PRESETS =
+    {
+        p2 : { env:1, reg:1, time:1 },
+        p10: { env:2, reg:2, time:3 },
+        p40: { env:4, reg:3, time:4 }
+    };
+
+    /* ══════════ stage ══════════ */
+
+    const S =
+    {
+        env:0,
+        reg:0,
+        time:0,
+        bio:false,
+        fact:false
+    };
+
+    /* ══════════ DOM ══════════ */
+
+    const $ = id => document.getElementById(id);
+
+    const sEnv = $("sEnv"), sReg = $("sReg"), sTime = $("sTime");
+    const argEnv = $("argEnv"), argReg = $("argReg"), argTime = $("argTime");
+    const stmt = $("statement");
+    const discFill = $("discFill"), discText = $("discText");
+    const axisTicks = $("axisTicks"), axisMarks = $("axisMarks"), axisNeedle = $("axisNeedle");
+    const axisNote = $("axisNote");
+    const factLayer = $("factLayer"), factLine = $("factLine"), factRestore = $("factRestore");
+    const live = $("live");
+
+    /* ══════════ computing ══════════ */
+
+    function isBound()
+    {
+        return S.env > 0 && S.reg > 0 && S.time > 0;
+    }
+
+    function computeK()
+    {
+        if (!isBound())
+            return null;
+
+        return BASE * ENV[S.env].k * REG[S.reg].k * TIME[S.time].k;
+    }
+
+    function fmt(k)
+    {
+        if (k === null)
+            return "\u2014";
+
+        const s = k >= 10 ? k.toFixed(0) : k.toFixed(1);
+
+        return language === "hu" ? s.replace(".", ",") : s;
+    }
+
+    function axisX(k)
+    {
+        const a = Math.log(K_MIN), b = Math.log(K_MAX);
+        const f = (Math.log(k) - a) / (b - a);
+
+        return 30 + f * 840;
+    }
+
+    /* ══════════ drawing: axis ══════════ */
+
+    function buildAxis()
+    {
+        axisTicks.innerHTML = "";
+        axisMarks.innerHTML = "";
+
+        const NS = "http://www.w3.org/2000/svg";
+
+        for (const v of [1, 2, 5, 10, 20, 50])
+        {
+            const x = axisX(v);
+
+            const ln = document.createElementNS(NS, "line");
+            ln.setAttribute("x1", x); ln.setAttribute("x2", x);
+            ln.setAttribute("y1", 46); ln.setAttribute("y2", 52);
+            ln.setAttribute("stroke", "var(--rule-strong)");
+            axisTicks.appendChild(ln);
+
+            const tx = document.createElementNS(NS, "text");
+            tx.setAttribute("x", x); tx.setAttribute("y", 66);
+            tx.setAttribute("text-anchor", "middle");
+            tx.setAttribute("font-family", "IBM Plex Mono, monospace");
+            tx.setAttribute("font-size", "13");
+            tx.setAttribute("fill", "var(--ink-soft)");
+            tx.textContent = v;
+            axisTicks.appendChild(tx);
+        }
+
+        for (const m of MARKS)
+        {
+            const x = axisX(m);
+
+            const ln = document.createElementNS(NS, "line");
+            ln.setAttribute("x1", x); ln.setAttribute("x2", x);
+            ln.setAttribute("y1", 18); ln.setAttribute("y2", 46);
+            ln.setAttribute("stroke", "var(--mark)");
+            ln.setAttribute("stroke-width", "1");
+            ln.setAttribute("stroke-dasharray", "2 3");
+            axisMarks.appendChild(ln);
+
+            const tx = document.createElementNS(NS, "text");
+            tx.setAttribute("x", x); tx.setAttribute("y", 13);
+            tx.setAttribute("text-anchor", "middle");
+            tx.setAttribute("font-family", "IBM Plex Mono, monospace");
+            tx.setAttribute("font-size", "12");
+            tx.setAttribute("fill", "var(--mark)");
+            tx.textContent = m;
+            axisMarks.appendChild(tx);
+        }
+    }
+
+    /* ══════════ drawing: whole area ══════════ */
+
+    function paintArg(box, table, index, locked)
+    {
+        const item = table[index];
+        const bound = index > 0;
+
+        box.classList.toggle("is-bound", bound && !locked);
+        box.classList.toggle("is-locked", !!locked);
+
+        box.querySelector(".arg-state").textContent =
+            locked ? t("stateFixed") : (bound ? t("stateBound") : t("stateUnbound"));
+
+        box.querySelector('[data-slot="value"]').textContent =
+            bound ? item[language] : t("pickIt");
+    }
+
+    function paintStatement(k)
+    {
+        if (k === null)
+        {
+            const missing = [];
+
+            if (S.env  === 0) missing.push(t("argEnv"));
+            if (S.reg  === 0) missing.push(t("argReg"));
+            if (S.time === 0) missing.push(t("argTime"));
+
+            stmt.classList.add("is-undefined");
+            stmt.innerHTML =
+                '<span class="lead">' + t("undefinedLead") + "</span> " +
+                t("undefinedBody") + " " + missing.join(", ") + ".";
+
+            return;
+        }
+
+        stmt.classList.remove("is-undefined");
+
+        const e = '<span class="binding">' + ENV[S.env][language]  + "</span>";
+        const r = '<span class="binding">' + REG[S.reg][language]  + "</span>";
+        const h = '<span class="binding">' + TIME[S.time][language] + "</span>";
+        const n = '<span class="figure">'  + fmt(k) + "</span>";
+
+        if (language === "hu")
+        {
+            stmt.innerHTML =
+                t("stmtA") + e + ", " + r + " szerint, " + h +
+                t("stmtD") + n + t("stmtEnd");
+        }
+        else
+        {
+            stmt.innerHTML =
+                t("stmtA") + e + ", under " + r + ", over " + h +
+                t("stmtD") + n + t("stmtEnd");
+        }
+    }
+
+    function paintDisc(k)
+    {
+        const CY = 134, R_MAX = 118, GAP = 16;
+
+        if (k === null)
+        {
+            discFill.setAttribute("r", 0);
+            discText.setAttribute("y", CY + GAP);
+            discText.textContent = "\u2014";
+
+            return;
+        }
+
+        const r = R_MAX * Math.sqrt(k / K_MAX);   /* terület-arányos */
+
+        discFill.setAttribute("r", r.toFixed(1));
+        discText.setAttribute("y", (CY + r + GAP).toFixed(1));
+        discText.textContent = fmt(k);
+    }
+
+    function paintNeedle(k)
+    {
+        if (k === null)
+        {
+            axisNeedle.setAttribute("opacity", 0);
+            axisNote.textContent = "";
+
+            return;
+        }
+
+        const x = axisX(Math.min(Math.max(k, K_MIN), K_MAX));
+
+        axisNeedle.setAttribute("opacity", 1);
+        axisNeedle.setAttribute("transform", "translate(" + x.toFixed(1) + ",0)");
+
+        const near = MARKS.find(m => Math.abs(k - m) / m <= MARK_BAND);
+
+        axisNote.textContent = near
+            ? t("nearMark") + near + t("nearMarkEnd")
+            : "";
+    }
+
+    function paint()
+    {
+        const locked = S.bio;
+        const k = computeK();
+
+        paintArg(argEnv,  ENV,  S.env,  false);
+        paintArg(argReg,  REG,  S.reg,  locked);
+        paintArg(argTime, TIME, S.time, false);
+
+        argReg.querySelector('[data-slot="note"]').textContent =
+            locked ? t("regLockNote") : t("regFreeNote");
+
+        sReg.disabled = locked;
+
+        paintStatement(k);
+        paintDisc(k);
+        paintNeedle(k);
+
+        $("bFact").disabled = (k === null);
+        $("bCopy").disabled = (k === null);
+    }
+
+    /* ══════════ language ══════════ */
+
+    function applyLanguage()
+    {
+        document.documentElement.lang = language;
+
+        for (const el of document.querySelectorAll("[data-vk]"))
+            el.textContent = t(el.dataset.vk);
+
+        $("keysLine").textContent = t("keys");
+        $("bEn").setAttribute("aria-pressed", language === "en");
+        $("bHu").setAttribute("aria-pressed", language === "hu");
+
+        if (S.fact)                            /* a tény-képernyő is követi */
+        {
+            const k = computeK();
+
+            if (k !== null)
+            {
+                factLine.textContent = t("factLine") + fmt(k) + t("factUnit");
+                $("factGloss").textContent = t("factGloss1") + fmt(k) + t("factGloss2");
+            }
+        }
+
+        paint();
+    }
+
+    function setLanguage(lang)
+    {
+        language = lang;
+        applyLanguage();
+    }
+
+    /* ══════════ doings ══════════ */
+
+    function say(msg)
+    {
+        live.textContent = msg;
+    }
+
+    function setSense(bio)
+    {
+        S.bio = bio;
+
+        if (bio)
+            S.reg = REG_BIO_INDEX;
+
+        sReg.value = S.reg;
+
+        $("bBio").setAttribute("aria-pressed", bio);
+        $("bSoc").setAttribute("aria-pressed", !bio);
+
+        say(bio ? t("bioSwitch") : t("socSwitch"));
+        paint();
+    }
+
+    function applyPreset(name)
+    {
+        const p = PRESETS[name];
+
+        if (!p)
+            return;
+
+        if (S.bio)
+            setSense(false);
+
+        S.env = p.env;
+        S.reg = p.reg;
+        S.time = p.time;
+
+        sEnv.value = S.env;
+        sReg.value = S.reg;
+        sTime.value = S.time;
+
+        paint();
+    }
+
+    function clearBindings()
+    {
+        S.env = 0; S.time = 0;
+
+        if (!S.bio)
+            S.reg = 0;
+
+        sEnv.value = 0; sTime.value = S.time; sReg.value = S.reg;
+
+        say(t("cleared"));
+        paint();
+    }
+
+    function boundSentence()
+    {
+        const k = computeK();
+
+        if (k === null)
+            return t("undefinedLead");
+
+        return stmt.textContent;
+    }
+
+    function enterFact()
+    {
+        const k = computeK();
+
+        if (k === null)
+            return;
+
+        S.fact = true;
+        factLine.textContent = t("factLine") + fmt(k) + t("factUnit");
+        $("factGloss").textContent = t("factGloss1") + fmt(k) + t("factGloss2");
+        factLayer.classList.add("on");
+        factRestore.classList.remove("on");
+
+        setTimeout(() =>
+        {
+            if (S.fact)
+            {
+                factRestore.classList.add("on");
+                $("bRestore").focus();
+            }
+        }, 2600);
+    }
+
+    function leaveFact()
+    {
+        S.fact = false;
+        factLayer.classList.remove("on");
+        factRestore.classList.remove("on");
+        $("bFact").focus();
+    }
+
+    /* ══════════ bounding listeners ══════════ */
+
+    sEnv.addEventListener("input", e =>
+    {
+        S.env = +e.target.value;
+        paint();
+    });
+
+    sReg.addEventListener("input", e =>
+    {
+        if (S.bio)
+        {
+            e.target.value = S.reg;
+
+            return;
+        }
+
+        S.reg = +e.target.value;
+        paint();
+    });
+
+    sTime.addEventListener("input", e =>
+    {
+        S.time = +e.target.value;
+        paint();
+    });
+
+    $("bBio").addEventListener("click", () => setSense(true));
+    $("bSoc").addEventListener("click", () => setSense(false));
+
+    $("p2").addEventListener("click",  () => applyPreset("p2"));
+    $("p10").addEventListener("click", () => applyPreset("p10"));
+    $("p40").addEventListener("click", () => applyPreset("p40"));
+
+    $("bClear").addEventListener("click", clearBindings);
+
+    $("bEn").addEventListener("click", () => setLanguage("en"));
+    $("bHu").addEventListener("click", () => setLanguage("hu"));
+
+    $("bFact").addEventListener("click", enterFact);
+    $("bRestore").addEventListener("click", leaveFact);
+
+    $("bCopy").addEventListener("click", () =>
+    {
+        const text = boundSentence();
+
+        if (navigator.clipboard)
+            navigator.clipboard.writeText(text).then(() => say(t("copyDone")));
+        else
+            say(text);
+    });
+
+    /* ══════════ key handling ══════════ */
+
+    window.addEventListener("keydown", e =>
+    {
+
+        if (e.metaKey || e.ctrlKey || e.altKey)
+            return;
+
+        if (e.target.tagName === "INPUT")
+            return;
+
+        const k = e.key.toLowerCase();
+
+        if (S.fact)
+        {
+            if (e.key === "Escape" || k === "f")
+            {
+                leaveFact();
+                e.preventDefault();
+            }
+
+            return;
+        }
+
+        if (k === "1")      { applyPreset("p2");  e.preventDefault(); }
+        else if (k === "2") { applyPreset("p10"); e.preventDefault(); }
+        else if (k === "3") { applyPreset("p40"); e.preventDefault(); }
+        else if (k === "c") { clearBindings();    e.preventDefault(); }
+        else if (k === "b") { setSense(!S.bio);   e.preventDefault(); }
+        else if (k === "f") { enterFact();        e.preventDefault(); }
+        else if (k === "l") { setLanguage(language === "en" ? "hu" : "en"); e.preventDefault(); }
+    });
+
+    /* ══════════ starting ══════════ */
+
+    function seed()
+    {
+        buildAxis();
+        applyLanguage();
+    }
+
+    seed();
+})();
+</script>
+</body>
+</html>
