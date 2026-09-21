@@ -15,6 +15,12 @@ number at all.
 
 A single self-contained HTML file. Bilingual (English, Hungarian). Runs in any
 modern browser, offline, with no installation and no data collected.
+No build step, no dependencies.
+
+## Citation
+
+https://doi.org/10.5281/zenodo.22876859
+
 
 ## Note on the figures
 
